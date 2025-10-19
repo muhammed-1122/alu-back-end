@@ -53,4 +53,4 @@ if __name__ == "__main__":
 
     # Write data to JSON
     with open(filename, mode='w') as file:
-        json.dump(json_data, file)sx
+        json.dump(json_data, file)
