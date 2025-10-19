@@ -1,31 +1,39 @@
-#!/usr/bin/python3
-"""Exports data in JSON format"""
+#!/usr/bin/env python3
+import sys
 import json
 import requests
-import sys
 
+if len(sys.argv) < 2:
+    print("Usage: python 2-another_script.py <employee_id>")
+    sys.exit(1)
 
-if __name__ == "__main__":
-    emp_id = int(sys.argv[1])
-    url_user = "https://jsonplaceholder.typicode.com/users/{}".format(emp_id)
-    url_todos = "https://jsonplaceholder.typicode.com/todos?userId={}".format(emp_id)
+emp_id = int(sys.argv[1])
 
-    user = requests.get(url_user).json()
-    todos = requests.get(url_todos).json()
+# Fetch user info
+user_url = f"https://jsonplaceholder.typicode.com/users/{emp_id}"
+response = requests.get(user_url)
+response.raise_for_status()
+user = response.json()
 
-    username = user.get("username")
+# Fetch user's TODO list
+todos_url = f"https://jsonplaceholder.typicode.com/users/{emp_id}/todos"
+response = requests.get(todos_url)
+response.raise_for_status()
+todos = response.json()
 
-    data = {
-        str(emp_id): [
-            {
-                "task": task.get("title"),
-                "completed": task.get("completed"),
-                "username": username
-            } for task in todos
-        ]
-    }
+# Structure the data
+data = {
+    str(emp_id): [
+        {
+            "username": user["username"],
+            "task": todo["title"],
+            "completed": todo["completed"]
+        }
+        for todo in todos
+    ]
+}
 
-    filename = "{}.json".format(emp_id)
-    with open(filename, "w") as f:
-        json.dump(data, f)
-
+# Export to JSON
+output_file = f"{emp_id}.json"
+with open(output_file, "w") as jsonfile:
+    json.dump(data, jsonfile)
